@@ -1,1 +1,1 @@
-Create a script that counts the number of directories in the path
+Create a script that lists environments variables
