@@ -19,13 +19,33 @@ echo 'Hello World!' |sudo tee  /var/www/html/index.html
 # create a webpage for error 404
 echo "Ceci n'est pas une page" |sudo tee /var/www/html/404.html
 
-# code to configure redirect for a single page(/redirect_me) and add header to display hostname
-string_for_replacement="server_name _;\n\tadd_header X-Served-By \$hostname;\n\trewrite ^\/redirect_me https:\/\/www.blog.ehoneahobed.com permanent;"
-sudo sed -i "s/server_name _;/$string_for_replacement/" /etc/nginx/sites-enabled/default
+# Create Nginx configuration file
+cat <<EOF > /etc/nginx/sites-available/default
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+  add_header X-Served-By \$hostname;
 
-# code to configure redirect for 404 error page
-string_for_replacement="listen 80 default_server;\n\terror_page 404 \/404.html;\n\tlocation = \/404.html {\n\t\troot \/var\/www\/html;\n\t\tinternal;\n\t}"
-sudo sed -i "s/listen 80 default_server;/$string_for_replacement/" /etc/nginx/sites-enabled/default
+  root /var/www/html;
+  index index.html;
+
+  location / {
+    try_files \$uri \$uri/ =404;
+  }
+
+  location /redirect_me {
+    return 301 'https://www.youtube.com/watch?v=axlUv9evU2k';
+  }
+
+  # Redirect error page
+  error_page 404 /404.html;
+  location = /404.html {
+    internal;
+    default_type text/html;
+    return 404 "Ceci n'est pas une page\\n";
+  }
+}
+EOF
 
 # restart the web server after updating the settings
 sudo service nginx restart
