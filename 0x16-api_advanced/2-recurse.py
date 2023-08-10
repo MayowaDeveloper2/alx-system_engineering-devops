@@ -1,7 +1,5 @@
 #!/usr/bin/python3
-"""
-Using reddit's API
-"""
+"""Using reddit's API"""
 import requests
 after = None
 
